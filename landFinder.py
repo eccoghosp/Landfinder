@@ -12,7 +12,7 @@ import datetime as dt
 import time
 import random
 
-server = 'ZACH-LAPTOP'
+server = '' # Server name goes here. 
 db = 'LandFinder'
 states = ['alaska', 'alabama', 'arkansas', 'arizona', 'california', 'colorado', 'connecticut',
           'district of columbia', 'delaware', 'florida', 'georgia', 'hawaii', 'iowa', 'idaho', 'illinois',
@@ -24,6 +24,9 @@ states = ['alaska', 'alabama', 'arkansas', 'arizona', 'california', 'colorado', 
 
 
 def get_state():
+'''
+Prompts user for a state, district of columbia, or usa
+'''
     choice = input("Which US state's properties do you want to see? ('USA' for all) ").lower()
     while choice not in states and choice != 'usa':
         choice = input('You must spell out the whole state. ').lower()
@@ -31,6 +34,10 @@ def get_state():
 
 
 def store_df(df, state='USA'):
+'''
+Saves the DataFrame into a new table named after the state. If all states are scrapped, then it will put each 
+state into its own table as well as a table called 'usa' for the collective dataframe. 
+'''
     try:
         engine = sqlalchemy.create_engine(
             f'mssql+pyodbc://@{server}/{db}?trusted_connection=yes&driver=ODBC Driver 17 for SQL Server'
@@ -43,6 +50,9 @@ def store_df(df, state='USA'):
 
 
 def get_pagenum(state, headers):
+''' 
+Get the number of pages on landwatch.com for a particular state. 
+'''
     url = f'https://www.landwatch.com/{state}_land_for_sale'
     soup = BeautifulSoup(requests.get(url, headers=headers).content, 'html.parser')
     prop_containers = soup.find_all(class_="_8cfc9")
@@ -51,6 +61,9 @@ def get_pagenum(state, headers):
 
 
 def get_land(state):
+''' 
+Scrapes data from each page in a state and puts it into a DataFrame. 
+'''
     n_pages = 0
     count = 0
     realtor = []
@@ -121,6 +134,9 @@ def get_land(state):
 
 
 def save_local_copy():
+''' 
+Option to save a local copy of a state as a .csv
+'''
     save = input('Do you want to save local copies? (y/n) ')
 
     # Determine whether to save local copies of each state
@@ -139,12 +155,16 @@ def save_local_copy():
 
 
 def main():
+'''
+Gets all properties for a state or whole usa. Saves the result to a SQL DB
+'''
     # Choose one or all states.csv to update SQL Server
     state_choice = get_state()
     save_state = save_local_copy()
 
     if state_choice == 'usa':
         data2 = pd.DataFrame()
+
         for state in states:
             sleep = random.randrange(1, 25)
             print(f'Waiting for {sleep} seconds to avoid detection.')
@@ -152,9 +172,11 @@ def main():
             print(f'Gathering data for {state}.')
             data = get_land(state)
             data2.append(data)
+                    
             if save_state == 1:
                 data.to_csv(f'C:{state}.csv', index=False)
             store_df(data, state)
+                    
         store_df(data2)
     else:
         print(f'Gathering data for {state_choice}.')
