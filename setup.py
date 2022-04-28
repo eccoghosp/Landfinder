@@ -8,5 +8,5 @@ setup(
     license='MIT License',
     author='Zach Mays',
     author_email='zachary.a.mays@gmail.com',
-    description='A we scraper to gather properties from landwatch.com and save it to a SQL server'
+    description='A web scraper to gather properties from landwatch.com and save it to a SQL server and a .csv'
 )
