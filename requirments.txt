@@ -1,0 +1,10 @@
+requests
+BeautifulSoup
+pandas
+sqlalchemy
+sub
+tqdm
+numpy
+datetime
+time
+random
